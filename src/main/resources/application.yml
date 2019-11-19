@@ -1,3 +1,4 @@
+
 #配置数据源的属性
 spring:
   datasource:
@@ -13,27 +14,40 @@ spring:
       validation-query: SELECT 'X'  #验证连接
       enable: true
 
+  devtools:
+    restart:
+      enabled: true  #页面开启热部署
+
   #监控配置
       stat-view-servlet:
         enabled: true
         login-username: root
         login-password: 123456
-        allow:
-        deny:
         url-pattern: /druid/*
+
 
   #thymeleaf的配置
   thymeleaf:
     cache: false
     enabled: true
-      web-stat-filter:
-        enabled: true
-        exclusions: "*.js,*.gif,*.jpg,*.png,*.css.*.ico,/druid/*"
+#      web-stat-filter:
+#        enabled: true
+#        exclusions: "*.js,*.gif,*.jpg,*.png,*.css.*.ico,/druid/*"
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+
 
 #mybatisplus的配置
 mybatis-plus:
   mapper-locations:
-  - classpath:mapper/*Mapper.xml
+  -classpath: mapper/*Mapper.xml
   global-config:
     gb-config:
       id-type: auto
+    banner: true
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  port: 8088

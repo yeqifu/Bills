@@ -6,6 +6,8 @@ import com.yeqifu.sys.service.IBilltypeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * InnoDB free: 10240 kB 服务实现类
@@ -17,4 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class BilltypeServiceImpl extends ServiceImpl<BilltypeMapper, Billtype> implements IBilltypeService {
 
+    @Override
+    public Billtype getById(Serializable id) {
+        return super.getById(id);
+    }
 }

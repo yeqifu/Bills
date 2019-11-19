@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>账单列表</title>
+    <link rel="stylesheet" th:href="@{/resources/layui/css/layui.css}" media="all" />
+    <link rel="stylesheet" th:href="@{/resources/css/public.css}" media="all" />
+    <style>
+        .input-radius{
+            height: 30px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1 align="center">账单列表</h1>
+<div style="text-align: center">
+    <form action="" class="layui-form layui-form-pane" id="searchFrm" method="post">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">帐单类型</label>
+                <div class="layui-input-inline">
+                    <select name="typeid" id="search_typeid">
+                        <option value="0">请选择</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">开始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="startDate" id="startDate" lay-verify="date" readonly="readonly" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">结束时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="endDate" id="endDate" lay-verify="date" readonly="readonly" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center">
+            <div class="layui-inline">
+                <button type="button" lay-filter="doSearch" lay-submit class="layui-btn layui-btn-normal layui-btn-radius">查询</button>
+            </div>
+            <div class="layui-inline">
+                <button type="reset" class="layui-btn layui-btn-warm layui-btn-radius">重置</button>
+            </div>
+            <div class="layui-inline">
+                <button type="button" lay-filter="doAdd" class="layui-btn layui-btn-radius">添加</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <table class="layui-hide" id="billTable" lay-filter="billTable"></table>
+</div>
+
+<script type="text/javascript" th:src="@{/resources/layui/layui.js}"></script>
+
+<script type="text/javascript">
+    layui.use(['form','jquery','layer','laydate','table'],function () {
+        var form=layui.form;
+        var $=layui.jquery;
+        var layer=layui.layer;
+        var laydate=layui.laydate;
+        var table=layui.table;
+        //渲染时间选择器
+        laydate.render({
+            elem:'#startDate'
+        });
+        laydate.render({
+            elem:'#endDate'
+        });
+        //加载table的数据
+        var tableIns=table.render({
+            elem: '#billTable'
+            ,url:'/bills/loadAllBills'
+            ,toolbar: true //开启头部工具栏，并为其绑定左侧模板
+            ,title: '帐单数据列表'
+            ,page: true
+            ,cols: [ [
+                {field:'id', title:'ID', align: 'center'}
+                ,{field:'title', title:'账单标题', align: 'center'}
+                ,{field:'billtime', title:'记账时间', align: 'center'}
+                /*  ,{field:'typeid', title:'类型ID ', align: 'center'} */
+                ,{field:'typeName', title:'类型名称 ', align: 'center'}
+                ,{field:'price', title:'账单金额', align: 'center'}
+                ,{field:'remark', title:'账单备注', align: 'center'}
+            ] ]
+        });
+    })
+</script>
+
+</body>
+</html>
