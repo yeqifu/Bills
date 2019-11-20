@@ -3,6 +3,7 @@ package com.yeqifu.vo;
 import com.yeqifu.sys.entity.Bill;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -13,7 +14,10 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode
 public class BillsVo extends Bill {
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
 
     private Integer page=1;

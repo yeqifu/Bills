@@ -6,6 +6,7 @@
     <title>账单列表</title>
     <link rel="stylesheet" th:href="@{/resources/layui/css/layui.css}" media="all" />
     <link rel="stylesheet" th:href="@{/resources/css/public.css}" media="all" />
+    <script type="text/javascript" th:src="@{/resources/layui/layui.js}"></script>
     <style>
         .input-radius{
             height: 30px;
@@ -29,13 +30,13 @@
             <div class="layui-inline">
                 <label class="layui-form-label">开始时间</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="startDate" id="startDate" lay-verify="date" readonly="readonly" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                    <input type="text" name="startDate" id="startDate" readonly="readonly" placeholder="yyyy-MM-dd" class="layui-input">
                 </div>
             </div>
             <div class="layui-inline">
                 <label class="layui-form-label">结束时间</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="endDate" id="endDate" lay-verify="date" readonly="readonly" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                    <input type="text" name="endDate" id="endDate" readonly="readonly" placeholder="yyyy-MM-dd" class="layui-input">
                 </div>
             </div>
         </div>
@@ -47,17 +48,68 @@
                 <button type="reset" class="layui-btn layui-btn-warm layui-btn-radius">重置</button>
             </div>
             <div class="layui-inline">
-                <button type="button" lay-filter="doAdd" class="layui-btn layui-btn-radius">添加</button>
+                <button type="button" id="doAdd" class="layui-btn layui-btn-radius">添加</button>
             </div>
         </div>
     </form>
 </div>
 
+<!--数据表格-->
 <div>
     <table class="layui-hide" id="billTable" lay-filter="billTable"></table>
 </div>
 
-<script type="text/javascript" th:src="@{/resources/layui/layui.js}"></script>
+<!--添加账单的弹出层-->
+<div id="addBillDiv" style="display: none;margin: 10px" >
+    <form id="dataFrm" method="post" lay-filter="dataFrm" class="layui-form layui-form-pane" >
+        <div class="layui-form-item">
+            <label class="layui-form-label">帐单类型</label>
+            <div class="layui-input-block" id="billTypeDiv">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label for="title" class="layui-form-label">账单标题</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="title" id="title" lay-verify="required" placeholder="请输入账单标题" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label for="billtime" class="layui-form-label">账单时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="billtime" id="billtime" readonly="readonly" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label for="price" class="layui-form-label">账单金额</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="price" id="price" lay-verify="number" placeholder="请输入账单金额" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+        </div>
+        <div class="layui-form-item ">
+            <div class="layui-inline">
+                <label for="remark" class="layui-form-label">账单备注</label>
+                <div class="layui-input-block">
+                    <textarea name="remark" cols="200" id="remark" lay-verify="required" placeholder="请输入账单备注" class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center">
+            <div class="layui-inline">
+                <button type="button" lay-filter="doSubmit" lay-submit="submit" class="layui-btn layui-btn-normal layui-btn-radius">添加</button>
+            </div>
+            <div class="layui-inline">
+                <button type="reset" class="layui-btn layui-btn-warm layui-btn-radius">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
 
 <script type="text/javascript">
     layui.use(['form','jquery','layer','laydate','table'],function () {
@@ -73,6 +125,13 @@
         laydate.render({
             elem:'#endDate'
         });
+
+        //渲染弹出层的时间选择器
+        laydate.render({
+            elem:'#billtime',
+            type:'datetime'
+        });
+
         //加载table的数据
         var tableIns=table.render({
             elem: '#billTable'
@@ -90,6 +149,83 @@
                 ,{field:'remark', title:'账单备注', align: 'center'}
             ] ]
         });
+
+        //初始化查询条件的下拉列表
+        $.get("/billtype/loadAllBillType",function(objs){
+            var types=objs.data;
+            var search_typeid=$("#search_typeid");
+            $.each(types,function(index,item){
+                search_typeid.append("<option value="+item.id+">"+item.name+"</option>");
+            });
+            form.render("select");
+        });
+
+        //模糊查询
+        form.on("submit(doSearch)",function (data) {
+            tableIns.reload({
+                url:'/bills/loadAllBills',
+                where:data.field,
+                page:{
+                    curr:1
+                }
+            })
+            return false;
+        });
+
+        var mainIndex;
+        //打开添加的弹出层
+        $("#doAdd").on("click",function () {
+            mainIndex = layer.open({
+                type:1,
+                content:$("#addBillDiv"),
+                area:['800px','400px'],
+                success:function () {
+                    var div = $("#billTypeDiv");
+                    $("#dataFrm")[0].reset();//清空表单
+                    div.html("");
+                    $.get("/billtype/loadAllBillType",function(objs){
+                        var types=objs.data;
+                        var dataFrom_typeid=$("#search_typeid");
+                        $.each(types,function(index,item){
+                            if(index==0){
+                                div.append('<input type="radio" name="typeid" value="'+item.id+'" title="'+item.name+'" checked >');
+                            }else{
+                                div.append('<input type="radio" name="typeid" value="'+item.id+'" title="'+item.name+'">')
+                            }
+                        });
+                        form.render("radio");
+                    });
+                    initBillDate();
+                }
+            });
+        });
+
+        //监控提交时间
+        form.on("submit(doSubmit)",function (data) {
+            $.post("/bills/addBills",data.field,function (res) {
+                layer.msg(res.msg);
+                if (res.code==200){
+                    layer.confirm('是否继续录入？', {
+                        btn: ['继续','取消'] //按钮
+                    }, function(index){
+                        $("#dataFrm")[0].reset();
+                        layer.close(index);
+                        //设置默认时间
+                        initBillDate();
+                    }, function(){
+                        layer.close(mainIndex);
+                    });
+                }
+               tableIns.reload();
+            });
+            return false;
+        });
+
+        function initBillDate() {
+            var data = new Date();
+            //设置默认时间
+            form.val("dataFrm",{billtime:(data.getFullYear()+"-"+(data.getMonth()+1)+"-"+data.getDate()+" "+data.getHours()+":"+data.getMinutes()+":"+data.getSeconds())})
+        }
     })
 </script>
 

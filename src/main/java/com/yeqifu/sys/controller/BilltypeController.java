@@ -1,9 +1,15 @@
 package com.yeqifu.sys.controller;
 
 
+import com.yeqifu.common.DataGridView;
+import com.yeqifu.sys.service.IBilltypeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * <p>
@@ -14,8 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2019-11-18
  */
 @RestController
-@RequestMapping("/sys/billtype")
+@RequestMapping("/billtype")
 public class BilltypeController {
+
+    @Autowired
+    private IBilltypeService billtypeService;
+
+    @RequestMapping("loadAllBillType")
+    public DataGridView loadAllBillType(){
+        return new DataGridView(0L,billtypeService.list());
+    }
 
 }
 

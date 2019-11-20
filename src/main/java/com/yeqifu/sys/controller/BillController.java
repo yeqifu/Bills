@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yeqifu.common.DataGridView;
+import com.yeqifu.common.ResultObj;
 import com.yeqifu.sys.entity.Bill;
 import com.yeqifu.sys.entity.Billtype;
 import com.yeqifu.sys.service.IBillService;
@@ -63,10 +64,27 @@ public class BillController {
 
         List<Bill> records = page.getRecords();
         for (Bill bills : records) {
-            Billtype billtype = this.billtypeService.getById(bills.getId());
+            Billtype billtype = this.billtypeService.getById(bills.getTypeid());
             bills.setTypeName(billtype.getName());
         }
         return new DataGridView(page.getTotal(),records);
+    }
+
+    /**
+     * 添加账单
+     * @param billsVo
+     * @return
+     */
+    @RequestMapping("addBills")
+    @ResponseBody
+    public ResultObj addBills(BillsVo billsVo){
+        try {
+            this.billService.save(billsVo);
+            return new ResultObj(200,"添加成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResultObj(-1,"录入失败");
+        }
     }
 
 }
